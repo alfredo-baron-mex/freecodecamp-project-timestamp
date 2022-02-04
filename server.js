@@ -25,8 +25,33 @@ app.get("/api/hello", function (req, res) {
 });
 
 
+// No parameter, return current date and time
+app.get("/api/timestamp/", function (req, res) {
+  var intDate = Date.now();
+  res.json({'unix': intDate, 'utc': new Date(intDate).toUTCString()});
+});
+
+// Route to handle parameter: String Date or String Unix Date. Anything else is an invalid Date
+app.get("/api/timestamp/:date", (req, res) => {
+  var strDate = req.params.date;
+  // Check if the parameter is a Date in String format
+  if (!isNaN(Date.parse(strDate))) {
+    var dateObject = new Date(strDate);
+    res.json({ 'unix': dateObject.valueOf(), 'utc': dateObject.toUTCString() });
+  } else if (/\d{5,}/.test(strDate)) { // Check if the parameter is a Date as integer in unix format
+      var intDate = parseInt(strDate);
+      res.json({ 'unix': intDate, 'utc': new Date(intDate).toUTCString() });
+  } else { // Anything else is an invalid Date
+    res.json({ 'error': "Invalid Date" });
+  }
+
+});
+
+
+// use port 3000 or any defined in environment
+var port = process.env.PORT || 3000;
 
 // listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
+var listener = app.listen(port, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
